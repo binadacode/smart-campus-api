@@ -1,4 +1,8 @@
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\Main.java
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\SmartCampusApplication.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\DataStore.java
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\model\Sensor.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\resource\DiscoveryResource.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\model\Room.java
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\model\SensorReading.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\resource\RoomResource.java

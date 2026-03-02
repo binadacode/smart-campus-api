@@ -1,4 +1,8 @@
-com\smartcampus\SmartCampusApplication.class
+com\smartcampus\DataStore.class
 com\smartcampus\model\Sensor.class
 com\smartcampus\Main.class
+com\smartcampus\SmartCampusApplication.class
+com\smartcampus\model\Room.class
+com\smartcampus\resource\DiscoveryResource.class
+com\smartcampus\resource\RoomResource.class
 com\smartcampus\model\SensorReading.class
