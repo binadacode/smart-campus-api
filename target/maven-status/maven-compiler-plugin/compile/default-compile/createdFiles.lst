@@ -1,2 +1,4 @@
 com\smartcampus\SmartCampusApplication.class
+com\smartcampus\model\Sensor.class
 com\smartcampus\Main.class
+com\smartcampus\model\SensorReading.class
