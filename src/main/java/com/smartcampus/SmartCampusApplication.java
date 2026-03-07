@@ -1,8 +1,12 @@
 package com.smartcampus;
 
 import jakarta.ws.rs.ApplicationPath;
-import jakarta.ws.rs.core.Application;
+import org.glassfish.jersey.server.ResourceConfig;
 
 @ApplicationPath("/api/v1")
-public class SmartCampusApplication extends Application {
+public class SmartCampusApplication extends ResourceConfig {
+
+    public SmartCampusApplication() {
+        packages("com.smartcampus");
+    }
 }

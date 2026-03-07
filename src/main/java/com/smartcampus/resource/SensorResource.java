@@ -1,6 +1,7 @@
 package com.smartcampus.resource;
 
 import com.smartcampus.DataStore;
+import com.smartcampus.exception.LinkedResourceNotFoundException;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.model.Room;
 
@@ -50,9 +51,7 @@ public class SensorResource {
         Room room = DataStore.rooms.get(sensor.getRoomId());
 
         if (room == null) {
-            return Response.status(422)
-                    .entity("Referenced room does not exist.")
-                    .build();
+            throw new LinkedResourceNotFoundException("Referenced room does not exist.");
         }
 
         DataStore.sensors.put(sensor.getId(), sensor);

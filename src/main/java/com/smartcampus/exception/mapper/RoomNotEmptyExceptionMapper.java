@@ -1,13 +1,10 @@
 package com.smartcampus.exception.mapper;
 
 import com.smartcampus.exception.RoomNotEmptyException;
-
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Provider
 public class RoomNotEmptyExceptionMapper implements ExceptionMapper<RoomNotEmptyException> {
@@ -15,12 +12,11 @@ public class RoomNotEmptyExceptionMapper implements ExceptionMapper<RoomNotEmpty
     @Override
     public Response toResponse(RoomNotEmptyException ex) {
 
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "Room Conflict");
-        error.put("message", ex.getMessage());
+        String message = "{\"error\":\"Room Conflict\",\"message\":\"Room contains active sensors.\"}";
 
         return Response.status(Response.Status.CONFLICT)
-                .entity(error)
+                .entity(message)
+                .type(MediaType.APPLICATION_JSON)
                 .build();
     }
 }
