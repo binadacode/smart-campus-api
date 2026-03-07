@@ -2,9 +2,15 @@ D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\ma
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\SmartCampusApplication.java
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\DataStore.java
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\model\Sensor.java
-D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\resource\DiscoveryResource.java
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\model\Room.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\resource\SensorReadingResource.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\exception\mapper\GlobalExceptionMapper.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\exception\RoomNotEmptyException.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\exception\mapper\LinkedResourceNotFoundExceptionMapper.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\resource\DiscoveryResource.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\exception\SensorUnavailableException.java
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\model\SensorReading.java
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\resource\SensorResource.java
-D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\resource\SensorReadingResource.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\exception\LinkedResourceNotFoundException.java
 D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\resource\RoomResource.java
+D:\OneDrive - University of Westminster\Documents\GitHub\smart-campus-api\src\main\java\com\smartcampus\exception\mapper\SensorUnavailableExceptionMapper.java
