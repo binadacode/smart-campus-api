@@ -7,3 +7,4 @@ com\smartcampus\model\Room.class
 com\smartcampus\resource\DiscoveryResource.class
 com\smartcampus\resource\RoomResource.class
 com\smartcampus\model\SensorReading.class
+com\smartcampus\resource\SensorReadingResource.class
