@@ -25,6 +25,9 @@ public class SensorReadingResource {
 
     @GET
     public Response getReadings() {
+        if (!DataStore.sensors.containsKey(sensorId)) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
 
         List<SensorReading> readings =
                 DataStore.readings.getOrDefault(sensorId, new ArrayList<>());
@@ -58,7 +61,7 @@ public class SensorReadingResource {
         sensor.setCurrentValue(reading.getValue());
 
         return Response.status(Response.Status.CREATED)
-                .entity(reading)
+                .entity("{\"id\":\"" + reading.getId() + "\"}")
                 .build();
     }
 }

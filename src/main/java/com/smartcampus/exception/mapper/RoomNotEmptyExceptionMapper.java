@@ -12,7 +12,7 @@ public class RoomNotEmptyExceptionMapper implements ExceptionMapper<RoomNotEmpty
     @Override
     public Response toResponse(RoomNotEmptyException ex) {
 
-        String message = "{\"error\":\"Room Conflict\",\"message\":\"Room contains active sensors.\"}";
+        String message = "{\"error\":\"" + ex.getMessage() + "\"}";
 
         return Response.status(Response.Status.CONFLICT)
                 .entity(message)

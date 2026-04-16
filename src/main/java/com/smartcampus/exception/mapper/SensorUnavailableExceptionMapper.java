@@ -18,7 +18,7 @@ public class SensorUnavailableExceptionMapper implements ExceptionMapper<SensorU
     @Override
     public Response toResponse(SensorUnavailableException ex) {
 
-        String json = "{\"error\":\"Sensor Unavailable\",\"message\":\"" + ex.getMessage() + "\"}";
+        String json = "{\"error\":\"" + ex.getMessage() + "\"}";
 
         return Response.status(Response.Status.FORBIDDEN)
                 .entity(json)

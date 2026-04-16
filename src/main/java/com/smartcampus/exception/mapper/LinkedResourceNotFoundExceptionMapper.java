@@ -18,7 +18,7 @@ public class LinkedResourceNotFoundExceptionMapper implements ExceptionMapper<Li
     @Override
     public Response toResponse(LinkedResourceNotFoundException ex) {
 
-        String json = "{\"error\":\"Invalid Reference\",\"message\":\"" + ex.getMessage() + "\"}";
+        String json = "{\"error\":\"" + ex.getMessage() + "\"}";
 
         return Response.status(422)
                 .entity(json)

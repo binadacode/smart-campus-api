@@ -60,7 +60,7 @@ public class SensorResource {
         room.getSensorIds().add(sensor.getId());
 
         return Response.status(Response.Status.CREATED)
-                .entity(sensor)
+                .entity("{\"id\":\"" + sensor.getId() + "\"}")
                 .build();
     }
 
