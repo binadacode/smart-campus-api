@@ -38,33 +38,37 @@ public class SensorResource {
 
         if (sensor.getId() == null || sensor.getId().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Sensor ID is required.")
+                    .entity("{\"error\":\"Sensor ID is required.\"}")
+                    .type(MediaType.APPLICATION_JSON)
                     .build();
         }
 
         if (sensor.getRoomId() == null || sensor.getRoomId().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Room ID is required.")
+                    .entity("{\"error\":\"Room ID is required.\"}")
+                    .type(MediaType.APPLICATION_JSON)
                     .build();
         }
 
         Room room = DataStore.rooms.get(sensor.getRoomId());
 
         if (room == null) {
-            throw new LinkedResourceNotFoundException("Referenced room does not exist.");
+            return Response.status(422)
+                    .entity("{\"error\":\"Referenced room does not exist.\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
         }
 
         DataStore.sensors.put(sensor.getId(), sensor);
-
-        // Link sensor to room
         room.getSensorIds().add(sensor.getId());
 
         return Response.status(Response.Status.CREATED)
                 .entity("{\"id\":\"" + sensor.getId() + "\"}")
+                .type(MediaType.APPLICATION_JSON)
                 .build();
     }
 
-        @Path("/{sensorId}/readings")
+    @Path("/{sensorId}/readings")
     public SensorReadingResource getReadingResource(
             @PathParam("sensorId") String sensorId) {
 

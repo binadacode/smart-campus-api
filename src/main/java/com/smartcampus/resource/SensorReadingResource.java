@@ -1,7 +1,6 @@
 package com.smartcampus.resource;
 
 import com.smartcampus.DataStore;
-import com.smartcampus.exception.SensorUnavailableException;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.model.SensorReading;
 
@@ -42,12 +41,16 @@ public class SensorReadingResource {
 
         if (sensor == null) {
             return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Sensor not found.")
+                    .entity("{\"error\":\"Sensor not found.\"}")
+                    .type(MediaType.APPLICATION_JSON)
                     .build();
         }
 
         if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
-            throw new SensorUnavailableException("Sensor is under maintenance.");
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("{\"error\":\"Sensor is under maintenance.\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
         }
 
         reading.setId(UUID.randomUUID().toString());
@@ -57,11 +60,11 @@ public class SensorReadingResource {
                 .computeIfAbsent(sensorId, k -> new ArrayList<>())
                 .add(reading);
 
-        // REQUIRED SIDE EFFECT (spec requirement)
         sensor.setCurrentValue(reading.getValue());
 
         return Response.status(Response.Status.CREATED)
                 .entity("{\"id\":\"" + reading.getId() + "\"}")
+                .type(MediaType.APPLICATION_JSON)
                 .build();
     }
 }
