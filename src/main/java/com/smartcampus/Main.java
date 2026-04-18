@@ -4,7 +4,10 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import com.smartcampus.exception.mapper.GlobalExceptionMapper;
+import com.smartcampus.exception.mapper.LinkedResourceNotFoundExceptionMapper;
 import com.smartcampus.exception.mapper.RoomNotEmptyExceptionMapper;
+import com.smartcampus.exception.mapper.SensorUnavailableExceptionMapper;
 import com.smartcampus.filter.ApiLoggingFilter;
 
 import java.io.IOException;
@@ -18,7 +21,10 @@ public class Main {
 
         final ResourceConfig rc = new ResourceConfig()
                 .packages("com.smartcampus.resource")
+                .register(LinkedResourceNotFoundExceptionMapper.class)
                 .register(RoomNotEmptyExceptionMapper.class)
+                .register(SensorUnavailableExceptionMapper.class)
+                .register(GlobalExceptionMapper.class)
                 .register(ApiLoggingFilter.class);
 
         return GrizzlyHttpServerFactory.createHttpServer(

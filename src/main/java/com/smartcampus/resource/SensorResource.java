@@ -53,10 +53,7 @@ public class SensorResource {
         Room room = DataStore.rooms.get(sensor.getRoomId());
 
         if (room == null) {
-            return Response.status(422)
-                    .entity("{\"error\":\"Referenced room does not exist.\"}")
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
+            throw new LinkedResourceNotFoundException("Room with ID '" + sensor.getRoomId() + "' does not exist.");
         }
 
         DataStore.sensors.put(sensor.getId(), sensor);
