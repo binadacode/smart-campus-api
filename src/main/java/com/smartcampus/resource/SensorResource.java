@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 @Path("/sensors")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class SensorResource {
 
     // GET /api/v1/sensors
@@ -34,6 +33,7 @@ public class SensorResource {
 
     // POST /api/v1/sensors
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response createSensor(Sensor sensor) {
 
         if (sensor.getId() == null || sensor.getId().isEmpty()) {
