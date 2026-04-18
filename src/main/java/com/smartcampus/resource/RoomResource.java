@@ -12,7 +12,6 @@ import java.util.Collection;
 
 @Path("/rooms")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class RoomResource {
 
     // GET /api/v1/rooms
@@ -23,6 +22,7 @@ public class RoomResource {
 
     // POST /api/v1/rooms
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response createRoom(Room room) {
 
         if (room.getId() == null || room.getId().isEmpty()) {

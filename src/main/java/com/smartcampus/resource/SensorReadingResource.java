@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class SensorReadingResource {
 
     private final String sensorId;
@@ -35,6 +34,7 @@ public class SensorReadingResource {
     }
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response addReading(SensorReading reading) {
 
         Sensor sensor = DataStore.sensors.get(sensorId);
