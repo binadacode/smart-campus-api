@@ -198,9 +198,7 @@ Expected: Array containing only sensors whose `type` matches `"CO2"` (case-insen
 
 ### Q1 (Part 1.1): JAX-RS resource lifecycle and in-memory state
 
-By default, JAX-RS creates a new instance of each resource class for every incoming request. This means you cannot store application data in instance fields — they would be created fresh and then thrown away after each response.
-
-This project puts all data in `DataStore`, which declares its three maps as `public static final` fields:
+JAX-RS creates a new instance of each resource class for very incoming request by default. This means application data cannot be stored in instance fields, they would be created fresh and then thrown away after each response. This project puts all data in DataStore, which declares its 3 maps as public static final fields:
 
 ```java
 public static final Map<String, Room>   rooms    = new ConcurrentHashMap<>();
@@ -208,65 +206,43 @@ public static final Map<String, Sensor> sensors  = new ConcurrentHashMap<>();
 public static final Map<String, List<SensorReading>> readings = new ConcurrentHashMap<>();
 ```
 
-Because the fields are `static`, they belong to the class, not to any one instance. Every request — regardless of which `RoomResource` or `SensorResource` object handles it — reads from and writes to the same map. `ConcurrentHashMap` is used instead of `HashMap` because multiple requests can arrive on different threads at the same time. `ConcurrentHashMap` allows concurrent reads and uses segment-level locking on writes, which prevents the data corruption and `ConcurrentModificationException` errors that would occur with a plain `HashMap` under concurrent load.
+As the fields are static they belong to the class and not to any 1 instance. Every request reads from and writes to the same map regardless of which object handles it. 
 
 ---
 
 ### Q2 (Part 1.2): HATEOAS and its benefit to client developers
 
-HATEOAS means the server includes links in its responses that tell the client what it can do next, rather than the client having to know all URLs upfront. A response to `POST /rooms` that follows HATEOAS would include a `self` link, a link to the room's sensors, and a link to delete the room. The client follows those links instead of constructing URLs from a separate document.
-
-The practical benefit is that URLs can change server-side without breaking clients. A client that navigates links does not hardcode `/api/v1/rooms/LIB-301` — it discovers the path at runtime from the response. This is especially useful when resources move, are versioned, or have conditional links: for example, a DELETE link would only appear if the room has no sensors, communicating that precondition to the client without requiring it to call a separate endpoint.
-
-This API's discovery endpoint (`GET /api/v1/`) returns a `resources` map with paths to `/api/v1/rooms` and `/api/v1/sensors`, which is a step toward HATEOAS. Individual resource responses do not yet include navigable links, so the implementation sits at Richardson Maturity Model Level 2.
+HATEOAS means the server includes links in its responses that tell the client what it can do next instead of the client knowing all URLs upfront. A response to POST /rooms that follows HATEOAS would include a self link, a link to the room’s sensors and a link to delete the room. The client uses those links rather than creating URLs on a different document. The usefulness of this in practice is that URLs can be modified on the server side without errors. A client that navigates links does not hardcode /api/v1/rooms/LIB-301, it discovers the path at runtime from its response. This is particularly useful when resources move, are versioned or have conditional links. The API’s discovery endpoint (GET /api/v1 ) returns a resources map with paths to /api/v1/rooms and /api/v1/sensors which is a step towards HATEOAS. 
 
 ---
 
 ### Q3 (Part 2.1): Returning IDs vs. full objects in list responses
 
-`GET /api/v1/rooms` currently returns full `Room` objects, including their `sensorIds` list. The alternative — returning only IDs — reduces response size but forces the client to make one `GET /api/v1/rooms/{id}` call per room to get usable data. That's the N+1 problem: 50 rooms means 51 HTTP requests instead of one.
-
-Returning full objects is the right choice when the client needs room data to render a list (e.g. a table of room names and capacities). It means one round trip regardless of how many rooms there are.
-
-Returning only IDs makes sense when the list is very large and most entries won't be displayed in detail, or when the client applies client-side filtering before fetching full records. In that case, transferring 10 KB of full objects to use 500 bytes of IDs wastes bandwidth.
-
-For this project, where rooms are few and always displayed in full, returning the complete object per room is the correct choice. If the API needed to support paginated lists of thousands of rooms, a cursor-based response returning minimal fields (ID, name) with a separate detail endpoint would be more appropriate.
+GET /api/v1/rooms currently returns full Room objects including their sensorIds list. The other option is to return only IDs. This reduces response size but forces the client to make one GET /api/v1/rooms/{id} call per room to get usable data which is the N+1 problem. Full objects should be returned in cases where the client requires room data to render a list. It includes a round trip. The simplest decision is to send back only the IDs when the list is extremely large and most of the entries will not be shown at detail, or when the client is going to filter the list with client-side filtering before retrieving the full records. In that case transferring full objects to use IDs wastes bandwidth. For this project where rooms are few and always displayed in full returning the complete objects per room is the correct choice. 
 
 ---
 
 ### Q4 (Part 2.2): Is DELETE idempotent?
 
-HTTP DELETE is defined as idempotent: sending the same request multiple times must leave the server in the same final state. In this implementation, the first `DELETE /api/v1/rooms/LIB-301` call removes the room from `DataStore.rooms` and returns 204. A second identical call finds no entry in the map and returns 404.
-
-The server state after both calls is identical — the room does not exist. That satisfies idempotency. The response code changes from 204 to 404, but idempotency is defined on server state, not on the response code.
-
-One edge case in this implementation: if the room has sensors, `deleteRoom` throws `RoomNotEmptyException` before removing anything, returning 409. In that case the server state does not change, which is also idempotent — calling it repeatedly gives 409 each time until the sensors are removed.
+HTTP DELETE is defined as idempotent. In this implementation the first DELETE /api/v1/rooms/LIB-301 call removes the room from DataStore.rooms and returns 204. A 2nd identical call finds no entry in the map and returns 404. The server state after both calls is identical (the room does not exist) which satisfies idempotency. 
 
 ---
 
 ### Q5 (Part 3.1): `Content-Type: text/plain` on a `@Consumes(APPLICATION_JSON)` endpoint
 
-`@Consumes(MediaType.APPLICATION_JSON)` on the endpoint is a contract declaration. When a POST arrives with `Content-Type: text/plain`, the JAX-RS runtime checks the incoming `Content-Type` header against all registered `@Consumes` values before handing the request to the method.
-
-No match is found, so the runtime never calls the resource method. It returns HTTP 415 (Unsupported Media Type) directly. The request body is not read and no deserialization is attempted.
-
-This happens at the framework routing layer, not in application code, so there is no risk of a `text/plain` body reaching Jackson or causing a parse exception inside the method. The 415 response is generated by Jersey itself.
+@Consumes(MediaType.APPLICATION_JSON) on the endpoint is a contract declaration. In the case of a POST with Content-Type: text/plain the JAX-RS runtime verifies the receiving Content-Type header against all registered values of the type of content and then passes the request to the method. This occurs at the framework routing layer and does not occur within application code hence there is no possibility of text/plain body getting to Jackson resulting in a parse exception within the method. The 415 response is generated by Jersey itself.
 
 ---
 
 ### Q6 (Part 3.2): `@QueryParam` vs. path segments for filtering
 
-A URL path identifies a resource. `/sensors/type/CO2` says "CO2 is a resource at this location," which is wrong — CO2 is a filter criterion, not a resource. That design also requires a new route for every new filter dimension. Adding a status filter would need `/sensors/type/CO2/status/ACTIVE` or a separate route, and the routing table grows with every new filter.
-
-`@QueryParam` keeps the path clean: `/sensors` identifies the collection, `?type=CO2` narrows it. Adding a second filter is `/sensors?type=CO2&status=ACTIVE` with no route change. Clients can omit query parameters entirely to get the full collection, which is what this implementation does — `GET /api/v1/sensors` with no `type` param returns all sensors, and the filter is applied only when the param is present.
-
-Query parameters also compose naturally with pagination (`?page=2&size=20`) and sorting (`?sort=type`) without any changes to the path.
+A URL path identifies a resource. That design requires a new route for every new filter dimension. Adding a status filter would need a separate route and the routing table would grow with every new filter. @QueryParam keeps the path clean. A second filter can be added with no route change. Clients can remove query parameters completely to get the full collection which is what this implementation does. Query parameters also combine naturally with pagination and sorting without any changes to the path.
 
 ---
 
 ### Q7 (Part 4.1): Sub-resource locator pattern
 
-In `SensorResource`, the readings path is handled by this method:
+The readings path is handled by the below method in SensorResource:
 
 ```java
 @Path("/{sensorId}/readings")
@@ -275,41 +251,31 @@ public SensorReadingResource getReadingResource(@PathParam("sensorId") String se
 }
 ```
 
-There is no `@GET` or `@POST` on this method. JAX-RS sees it as a sub-resource locator: it returns an object (`SensorReadingResource`) and JAX-RS continues dispatching the request to that object's annotated methods. The `sensorId` path parameter is passed to `SensorReadingResource` via its constructor, so the reading resource always knows which sensor it belongs to.
-
-The alternative is to define every `GET /sensors/{id}/readings` and `POST /sensors/{id}/readings` method directly inside `SensorResource`. That works for two methods, but becomes a problem when readings have their own sub-paths, when the reading logic is complex, or when you want to test `SensorReadingResource` in isolation. The locator pattern puts reading logic in its own class with a single responsibility, and keeps `SensorResource` focused on sensor-level operations.
+There is no @GET or @POST on this method. JAX-RS recognizes it as a subresource locator because it returns an object (SensorReadingResource). JAX-RS continues dispatching the request to that object’s annotated methods. The sensorId path parameter is passed to SensorReadingResource through its constructor so the reading resource always knows which sensor it belongs to. The alternative is to define every GET /sensors/{id}/readings and POST /sensors/{id}/readings method directly inside SensorResource. That works for 2 methods but becomes a problem when readings have their own sub paths, when the reading logic is complicated or when SensorReadingResource should be tested separately. The locator pattern puts reading logic in its own class with a single responsibility and keeps SensorResouce focused on sensor level operations.
 
 ---
 
 ### Q8 (Part 5.2): HTTP 422 vs. 404 for a missing `roomId` reference
 
-404 means the URL the client requested does not exist. When a client posts to `/api/v1/sensors`, that URL exists and is handled correctly. The problem is not the URL — it's that the body contains a `roomId` value that does not match any room in `DataStore.rooms`.
-
-422 (Unprocessable Entity) means the server understood the request format and the URL is valid, but the content fails a business rule check. In this case the rule is: a sensor must reference an existing room. The body is syntactically valid JSON with the right fields; it just fails the referential check.
-
-Using 404 would tell the client the endpoint does not exist, which is false and would mislead them into thinking they have the wrong URL. Using 422 tells them exactly what's wrong: the data is well-formed but logically inconsistent. This makes the error actionable — the client knows to fix the `roomId` in the request body, not the URL.
+404 means the URL the client requested does not exist. When a client posts to /api/v1/sensors that URL exists and is handled correctly. 422 (unprocessable entity) means the server understood the request format and URL is valid but the content fails a business rule check. In this case the rule is a sensor must reference an existing room. Using 404 would tell the client the endpoint does not exist which is wrong as it would lead them into thinking they have the wrong URL. Using 422 tells the client exactly that the data is well formed but logically inconsistent. This makes the error actionable as the client will know to fix the roomId in the request body not the URL.
 
 ---
 
 ### Q9 (Part 5.4): Security risks from exposing raw stack traces
 
-A stack trace names every class and method in the call chain, including internal package names (e.g. `com.smartcampus.resource.SensorResource.createSensor`), the Jersey and Grizzly versions, and sometimes the operating system path to the JAR file. An attacker can use this to:
+A stack trace names every class and method in the call chain, including package names, the Jersey and Grizzly versions and sometimes the operating system path to the JAR file. An attacker can use this to:
 
-1. **Identify library versions.** If the trace shows `jersey-server 3.1.5`, the attacker checks whether that version has known CVEs and targets them directly.
-2. **Map the internal structure.** Package names reveal the application's class layout, making it easier to guess other endpoints or identify which methods to fuzz.
-3. **Confirm injection payloads worked.** If a SQL injection or deserialization attack partially succeeds, the resulting exception trace tells the attacker which layer broke and how to adjust.
+1. **Identify library versions:** if the trace shows the Jersey version the attacker can check whether that version has known CVEs and target them.
+2. **Map the internal structure:** package names reveal the application’s class layout. This makes it easier to guess other endpoints or identiy which methods should be attacked.
+3. **Confirm injection payloads worked:** if an SQL injection or deserialization attack partially succeeds, the resulting exception trace tells the attacker which layer broke and how to adjust accordingly.
 
-This project's `GlobalExceptionMapper` catches `Throwable` and returns only `{"error":"Unexpected error occurred"}` with a 500 status. The exception message and stack trace are never written to the response body. The full trace is still logged server-side (via `java.util.logging`), where it is visible to developers but not to API consumers.
+This project’s GlobalExceptionMapper catches Throwable and returns only {"error":"Unexpected error occurred"} with a 500 status. The exception message and stack trace are never written to the response body. The full trace is still logged server side where developers can view it but customers cannot.
 
 ---
 
 ### Q10 (Part 5.5): JAX-RS filters for logging vs. per-method calls
 
-`ApiLoggingFilter` implements both `ContainerRequestFilter` and `ContainerResponseFilter`. Every request passes through it, so every HTTP call is logged — the HTTP method, the full request URI on the way in, and the response status code on the way out — without any code in the resource classes.
-
-If you put `Logger.info(...)` calls inside each resource method instead, you log the inside of the method but not unmatched routes (which return 404 before any method runs), not requests rejected for wrong `Content-Type` (which return 415 without entering the method), and not framework-generated responses. You also have to remember to add logging to every new method you write.
-
-The filter approach logs everything at the container boundary. It also separates the concern of monitoring from the concern of business logic: `RoomResource.createRoom` does not need to know anything about logging, and the logging format can be changed in one file without touching any resource class.
+ApiLoggingFilter implements both ContainerRequestFilter and ContainerResponseFilter. Every request passes through it so every HTTP call is logged including the HTTP method, full request URI on the way in and response status code on the way out without any code in the resource classes. The filter approach logs everything at the container boundary. Also it supports separation of concerns as monitoring is separated from the business logic. RoomResource.createRoom does not need to know anything about logging and the logging format can be changed in one file without touching any resource class.
 
 ---
 
