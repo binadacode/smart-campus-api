@@ -34,16 +34,16 @@ public class SensorResource {
 
     // POST /api/v1/sensors
     @POST
+
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createSensor(Sensor sensor) {
 
+        // 1. GENERATE THE ID IF MISSING (The Fix)
         if (sensor.getId() == null || sensor.getId().isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorResponse("Sensor ID is required."))
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
+            sensor.setId(java.util.UUID.randomUUID().toString());
         }
 
+        // 2. Validate Room ID is provided
         if (sensor.getRoomId() == null || sensor.getRoomId().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorResponse("Room ID is required."))
@@ -51,15 +51,17 @@ public class SensorResource {
                     .build();
         }
 
+        // 3. Validate Room actually exists
         Room room = DataStore.rooms.get(sensor.getRoomId());
-
         if (room == null) {
             throw new LinkedResourceNotFoundException("Room with ID '" + sensor.getRoomId() + "' does not exist.");
         }
 
+        // 4. Save and link the sensor
         DataStore.sensors.put(sensor.getId(), sensor);
         room.getSensorIds().add(sensor.getId());
 
+        // 5. Return 201 Created with just the ID
         return Response.status(Response.Status.CREATED)
                 .entity(java.util.Collections.singletonMap("id", sensor.getId()))
                 .type(MediaType.APPLICATION_JSON)

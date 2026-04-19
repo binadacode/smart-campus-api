@@ -1,4 +1,5 @@
 $kind: http-request
+name: Create Sensor - Valid Room
 description: Creates a new sensor linked to a valid room (ID 1). Expects HTTP 201 Created.
 url: "{{baseUrl}}/sensors"
 method: POST
@@ -9,7 +10,7 @@ body:
   type: json
   content: |-
     {
-      "roomId": 1,
+      "roomId": "092e6c68-7d6a-4594-9916-d7623450d3e2",
       "sensorType": "TEMPERATURE",
       "status": "ACTIVE"
     }
