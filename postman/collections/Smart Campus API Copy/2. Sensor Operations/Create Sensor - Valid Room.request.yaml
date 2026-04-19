@@ -10,8 +10,8 @@ body:
   type: json
   content: |-
     {
-      "roomId": "092e6c68-7d6a-4594-9916-d7623450d3e2",
+      "roomId": "9ad7c0ce-a090-442e-aff4-f5377ce1f53c",
       "sensorType": "TEMPERATURE",
-      "status": "ACTIVE"
+      "status": "MAINTENANCE"
     }
 order: 1000

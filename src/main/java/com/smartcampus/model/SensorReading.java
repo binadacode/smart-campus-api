@@ -3,13 +3,13 @@ package com.smartcampus.model;
 public class SensorReading {
 
     private String id;
-    private long timestamp;
+    private String timestamp; // ISO-8601 string; overwritten server-side on every POST
     private double value;
 
     public SensorReading() {
     }
 
-    public SensorReading(String id, long timestamp, double value) {
+    public SensorReading(String id, String timestamp, double value) {
         this.id = id;
         this.timestamp = timestamp;
         this.value = value;
@@ -23,11 +23,11 @@ public class SensorReading {
         this.id = id;
     }
 
-    public long getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 

@@ -1,6 +1,7 @@
 $kind: http-request
+name: Create Reading for Sensor 1
 description: Posts a new reading for sensor ID 1 (ACTIVE status). Expects HTTP 201 Created.
-url: "{{baseUrl}}/sensors/1/readings"
+url: "{{baseUrl}}/sensors/6cd68aae-4e24-450c-a36c-2291071b0aa5/readings"
 method: POST
 headers:
   Content-Type: application/json

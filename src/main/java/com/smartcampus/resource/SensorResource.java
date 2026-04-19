@@ -11,39 +11,37 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Path("/sensors")
 @Produces(MediaType.APPLICATION_JSON)
 public class SensorResource {
 
-    // GET /api/v1/sensors
     @GET
     public Collection<Sensor> getAllSensors(@QueryParam("type") String type) {
-
         if (type == null) {
             return DataStore.sensors.values();
         }
 
+        // Call equalsIgnoreCase on the non-null query param so that a sensor
+        // with a null type field never throws a NullPointerException.
         return DataStore.sensors.values()
                 .stream()
-                .filter(sensor -> sensor.getType().equalsIgnoreCase(type))
+                .filter(sensor -> type.equalsIgnoreCase(sensor.getType()))
                 .collect(Collectors.toList());
     }
 
-    // POST /api/v1/sensors
     @POST
-
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createSensor(Sensor sensor) {
 
-        // 1. GENERATE THE ID IF MISSING (The Fix)
+        // Server is authoritative for ID generation.
         if (sensor.getId() == null || sensor.getId().isEmpty()) {
-            sensor.setId(java.util.UUID.randomUUID().toString());
+            sensor.setId(UUID.randomUUID().toString());
         }
 
-        // 2. Validate Room ID is provided
         if (sensor.getRoomId() == null || sensor.getRoomId().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorResponse("Room ID is required."))
@@ -51,23 +49,24 @@ public class SensorResource {
                     .build();
         }
 
-        // 3. Validate Room actually exists
+        // Validates the referenced room exists before persisting the sensor.
         Room room = DataStore.rooms.get(sensor.getRoomId());
         if (room == null) {
-            throw new LinkedResourceNotFoundException("Room with ID '" + sensor.getRoomId() + "' does not exist.");
+            throw new LinkedResourceNotFoundException(
+                    "Room with ID '" + sensor.getRoomId() + "' does not exist.");
         }
 
-        // 4. Save and link the sensor
         DataStore.sensors.put(sensor.getId(), sensor);
         room.getSensorIds().add(sensor.getId());
 
-        // 5. Return 201 Created with just the ID
         return Response.status(Response.Status.CREATED)
-                .entity(java.util.Collections.singletonMap("id", sensor.getId()))
+                .entity(Collections.singletonMap("id", sensor.getId()))
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
 
+    // Sub-resource locator — no HTTP verb annotation; JAX-RS delegates routing
+    // to SensorReadingResource based on the remainder of the path.
     @Path("/{sensorId}/readings")
     public SensorReadingResource getReadingResource(
             @PathParam("sensorId") String sensorId) {

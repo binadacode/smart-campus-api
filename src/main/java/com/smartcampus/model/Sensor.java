@@ -5,13 +5,15 @@ public class Sensor {
     private String id;
     private String type;
     private String status;
-    private double currentValue;
+    // Double (wrapper) instead of double (primitive) so the field can be null
+    // when no reading has been received yet, and to prevent unboxing NPEs.
+    private Double currentValue;
     private String roomId;
 
     public Sensor() {
     }
 
-    public Sensor(String id, String type, String status, double currentValue, String roomId) {
+    public Sensor(String id, String type, String status, Double currentValue, String roomId) {
         this.id = id;
         this.type = type;
         this.status = status;
@@ -43,11 +45,11 @@ public class Sensor {
         this.status = status;
     }
 
-    public double getCurrentValue() {
+    public Double getCurrentValue() {
         return currentValue;
     }
 
-    public void setCurrentValue(double currentValue) {
+    public void setCurrentValue(Double currentValue) {
         this.currentValue = currentValue;
     }
 
