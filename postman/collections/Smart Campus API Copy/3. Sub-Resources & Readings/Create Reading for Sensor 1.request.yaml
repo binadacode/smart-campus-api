@@ -1,0 +1,15 @@
+$kind: http-request
+description: Posts a new reading for sensor ID 1 (ACTIVE status). Expects HTTP 201 Created.
+url: "{{baseUrl}}/sensors/1/readings"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "value": 23.5,
+      "timestamp": "2026-04-19T12:00:00Z"
+    }
+order: 1000

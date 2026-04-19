@@ -1,0 +1,16 @@
+$kind: http-request
+description: Creates a new sensor linked to a valid room (ID 1). Expects HTTP 201 Created.
+url: "{{baseUrl}}/sensors"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "roomId": 1,
+      "sensorType": "TEMPERATURE",
+      "status": "ACTIVE"
+    }
+order: 1000

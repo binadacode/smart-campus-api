@@ -1,0 +1,9 @@
+$kind: http-request
+description: Retrieves all sensors filtered by type TEMPERATURE. Expects HTTP 200 OK with a list of matching sensors.
+url: "{{baseUrl}}/sensors?type=TEMPERATURE"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  type: TEMPERATURE
+order: 3000

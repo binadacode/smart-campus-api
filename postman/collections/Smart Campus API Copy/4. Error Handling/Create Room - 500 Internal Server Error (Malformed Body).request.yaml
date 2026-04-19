@@ -1,0 +1,11 @@
+$kind: http-request
+description: Sends a deliberately malformed payload where 'capacity' is a string instead of an integer. Intended to trigger the GlobalExceptionMapper and return HTTP 500 Internal Server Error.
+url: "{{baseUrl}}/rooms"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: '{ "name": "INVALID_CAPACITY_TYPE", "capacity": "not-a-number" }'
+order: 2000

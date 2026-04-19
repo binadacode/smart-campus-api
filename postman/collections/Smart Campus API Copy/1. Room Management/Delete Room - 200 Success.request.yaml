@@ -1,0 +1,7 @@
+$kind: http-request
+description: Deletes room with ID 2 (no linked sensors). Expects HTTP 200 OK or 204 No Content.
+url: "{{baseUrl}}/rooms/2"
+method: DELETE
+headers:
+  Accept: application/json
+order: 3000

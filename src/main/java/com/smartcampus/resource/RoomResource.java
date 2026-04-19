@@ -21,20 +21,21 @@ public class RoomResource {
     }
 
     // POST /api/v1/rooms
+    // POST /api/v1/rooms
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createRoom(Room room) {
 
-        if (room.getId() == null || room.getId().isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Room ID is required.")
-                    .build();
-        }
+        // 1. Generate the ID on the server (Delete the old null check)
+        String generatedId = java.util.UUID.randomUUID().toString();
+        room.setId(generatedId);
 
-        DataStore.rooms.put(room.getId(), room);
+        // 2. Save to DataStore
+        DataStore.rooms.put(generatedId, room);
 
+        // 3. Use Map.of() for safe JSON serialization
         return Response.status(Response.Status.CREATED)
-                .entity("{\"id\":\"" + room.getId() + "\"}")
+                .entity(java.util.Map.of("id", generatedId))
                 .build();
     }
 
@@ -46,8 +47,9 @@ public class RoomResource {
         Room room = DataStore.rooms.get(id);
 
         if (room == null) {
+            // Return error as a structured JSON object
             return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Room not found.")
+                    .entity(java.util.Map.of("error", "Room not found."))
                     .build();
         }
 
@@ -62,8 +64,9 @@ public class RoomResource {
         Room room = DataStore.rooms.get(id);
 
         if (room == null) {
+            // Return error as a structured JSON object
             return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Room not found.")
+                    .entity(java.util.Map.of("error", "Room not found."))
                     .build();
         }
 

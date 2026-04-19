@@ -1,0 +1,16 @@
+$kind: http-request
+description: Attempts to create a sensor referencing a non-existent room (ID 9999). Expects HTTP 422 Unprocessable Entity via LinkedResourceNotFoundException mapper.
+url: "{{baseUrl}}/sensors"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "roomId": 9999,
+      "sensorType": "HUMIDITY",
+      "status": "ACTIVE"
+    }
+order: 2000

@@ -2,6 +2,10 @@
 workspace:
   id: 30f674bf-2b9d-4696-83f9-3c476824054e
 
+cloudResources:
+  collections:
+    ..\postman\collections\Smart Campus API Copy: cb7823a5-297d-4b89-8dd4-ff3989cf7a32
+
 # All resources in the `postman/` folder are automatically registered in Local View.
 # Point to additional files outside the `postman/` folder to register them individually. Example:
 #localResources:

@@ -1,0 +1,4 @@
+$kind: collection
+name: Smart Campus API Copy
+variables:
+  baseUrl: http://localhost:8080/smart-campus/api
