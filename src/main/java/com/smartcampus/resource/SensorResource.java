@@ -2,6 +2,7 @@ package com.smartcampus.resource;
 
 import com.smartcampus.DataStore;
 import com.smartcampus.exception.LinkedResourceNotFoundException;
+import com.smartcampus.model.ErrorResponse;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.model.Room;
 
@@ -38,14 +39,14 @@ public class SensorResource {
 
         if (sensor.getId() == null || sensor.getId().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\":\"Sensor ID is required.\"}")
+                    .entity(new ErrorResponse("Sensor ID is required."))
                     .type(MediaType.APPLICATION_JSON)
                     .build();
         }
 
         if (sensor.getRoomId() == null || sensor.getRoomId().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\":\"Room ID is required.\"}")
+                    .entity(new ErrorResponse("Room ID is required."))
                     .type(MediaType.APPLICATION_JSON)
                     .build();
         }
@@ -60,7 +61,7 @@ public class SensorResource {
         room.getSensorIds().add(sensor.getId());
 
         return Response.status(Response.Status.CREATED)
-                .entity("{\"id\":\"" + sensor.getId() + "\"}")
+                .entity(java.util.Collections.singletonMap("id", sensor.getId()))
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }
