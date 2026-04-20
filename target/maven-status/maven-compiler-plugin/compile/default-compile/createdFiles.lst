@@ -5,6 +5,7 @@ com\smartcampus\Main.class
 com\smartcampus\exception\SensorUnavailableException.class
 com\smartcampus\exception\LinkedResourceNotFoundException.class
 com\smartcampus\exception\mapper\SensorUnavailableExceptionMapper.class
+com\smartcampus\model\ErrorResponse.class
 com\smartcampus\resource\SensorResource.class
 com\smartcampus\exception\mapper\LinkedResourceNotFoundExceptionMapper.class
 com\smartcampus\filter\ApiLoggingFilter.class
