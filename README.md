@@ -202,7 +202,7 @@ Expected: Array containing only sensors whose `type` matches `"CO2"` (case-insen
 
 ### Q1 (Part 1.1): JAX-RS resource lifecycle and in-memory state
 
-JAX-RS creates a new instance of each resource class for very incoming request by default. This means application data cannot be stored in instance fields, they would be created fresh and then thrown away after each response. This project puts all data in DataStore, which declares its 3 maps as public static final fields:
+JAX-RS creates a new instance of each resource class for very incoming request by default. This means application data cannot be stored in instance fields, they would be created fresh and then thrown away after each response. While JAX-RS also supports a **Singleton** lifecycle (where a single instance handles all requests), this project intentionally uses the default **Request-scoped** lifecycle to maintain strict request isolation. This project puts all data in DataStore, which declares its 3 maps as public static final fields:
 
 ```java
 public static final Map<String, Room>   rooms    = new ConcurrentHashMap<>();
