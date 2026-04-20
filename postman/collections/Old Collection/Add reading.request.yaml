@@ -1,7 +1,0 @@
-$kind: http-request
-url: http://localhost:8080/api/v1/sensors/TEMP-001/readings
-method: POST
-body:
-  type: json
-  content: "{\r\n  \"value\": 25.4\r\n}"
-order: 4485764904254706

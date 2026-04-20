@@ -1,8 +1,0 @@
-$kind: http-request
-name: Get Room by ID
-description: Retrieves room with ID 1. Expects HTTP 200 OK with the room resource.
-url: "{{baseUrl}}/rooms/ad1c10af-b931-4702-bb70-cab9a760949f"
-method: GET
-headers:
-  Accept: application/json
-order: 2000

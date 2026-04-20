@@ -1,8 +1,0 @@
-$kind: http-request
-name: Delete Room - 409 Conflict (Has Linked Sensors)
-description: Attempts to delete room with ID 1, which has linked sensors. Expects HTTP 409 Conflict.
-url: "{{baseUrl}}/rooms/521b66e1-9471-41cd-9ad6-1357af114009"
-method: DELETE
-headers:
-  Accept: application/json
-order: 4000
