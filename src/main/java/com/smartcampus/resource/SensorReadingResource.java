@@ -10,7 +10,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +58,7 @@ public class SensorReadingResource {
 
         // Server is authoritative for both ID and timestamp generation.
         reading.setId(UUID.randomUUID().toString());
-        reading.setTimestamp(Instant.now().toString()); // ISO-8601, e.g. "2024-04-18T10:00:00Z"
+        reading.setTimestamp(System.currentTimeMillis());
 
         DataStore.readings
                 .computeIfAbsent(sensorId, k -> new ArrayList<>())
