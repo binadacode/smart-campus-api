@@ -122,57 +122,61 @@ curl http://localhost:8080/api/v1/
 
 All commands target `http://localhost:8080/api/v1`. Start the server with `mvn exec:java` before running them.
 
+> **Note:** The server generates all resource IDs as UUIDs server-side. Any `id` field sent in the request body is ignored. The examples below use shell variables to capture returned IDs for chaining commands.
+
 **Create a room**
 ```bash
-curl -s -X POST http://localhost:8080/api/v1/rooms \
+ROOM_ID=$(curl -s -X POST http://localhost:8080/api/v1/rooms \
   -H "Content-Type: application/json" \
-  -d '{"id":"LIB-301","name":"Central Library Reading Room","capacity":120}'
+  -d '{"name":"Central Library Reading Room","capacity":120}' | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
+echo "Room ID: $ROOM_ID"
 ```
-Expected: `{"id":"LIB-301"}` — HTTP 201
+Expected response body: `{"id":"<uuid>"}` — HTTP 201
 
 ---
 
-**Create a sensor in room LIB-301**
+**Create a CO2 sensor in that room**
 ```bash
-curl -s -X POST http://localhost:8080/api/v1/sensors \
+SENSOR_ID=$(curl -s -X POST http://localhost:8080/api/v1/sensors \
   -H "Content-Type: application/json" \
-  -d '{"id":"CO2-007","roomId":"LIB-301","type":"CO2","status":"ACTIVE","currentValue":0.0}'
+  -d "{\"roomId\":\"$ROOM_ID\",\"type\":\"CO2\",\"status\":\"ACTIVE\",\"currentValue\":0.0}" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
+echo "Sensor ID: $SENSOR_ID"
 ```
-Expected: `{"id":"CO2-007"}` — HTTP 201. The sensor ID `"CO2-007"` is also added to `room.sensorIds`.
+Expected response body: `{"id":"<uuid>"}` — HTTP 201. The sensor UUID is also appended to `room.sensorIds`.
 
 ---
 
 **Post a reading to an ACTIVE sensor (verify `currentValue` side effect)**
 ```bash
-curl -s -X POST http://localhost:8080/api/v1/sensors/CO2-007/readings \
+curl -s -X POST "http://localhost:8080/api/v1/sensors/$SENSOR_ID/readings" \
   -H "Content-Type: application/json" \
   -d '{"value":415.5}'
 ```
-Expected: `{"id":"<uuid>"}` — HTTP 201. After this call, `GET /api/v1/sensors/CO2-007` will show `"currentValue":415.5`.
+Expected: `{"id":"<uuid>"}` — HTTP 201. After this call, `GET /api/v1/sensors/$SENSOR_ID` will show `"currentValue":415.5`.
 
 ---
 
 **Post a reading to a MAINTENANCE sensor → 403**
 ```bash
-# First, create a sensor in maintenance status
-curl -s -X POST http://localhost:8080/api/v1/sensors \
+# Create a sensor in MAINTENANCE status in the same room
+MAINT_ID=$(curl -s -X POST http://localhost:8080/api/v1/sensors \
   -H "Content-Type: application/json" \
-  -d '{"id":"TEMP-001","roomId":"LIB-301","type":"TEMPERATURE","status":"MAINTENANCE","currentValue":0.0}'
+  -d "{\"roomId\":\"$ROOM_ID\",\"type\":\"TEMPERATURE\",\"status\":\"MAINTENANCE\",\"currentValue\":0.0}" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
 
-# Then attempt a reading
-curl -s -X POST http://localhost:8080/api/v1/sensors/TEMP-001/readings \
+# Then attempt a reading — this will be rejected
+curl -s -X POST "http://localhost:8080/api/v1/sensors/$MAINT_ID/readings" \
   -H "Content-Type: application/json" \
   -d '{"value":22.1}'
 ```
-Expected: `{"error":"Sensor is under maintenance."}` — HTTP 403
+Expected: `{"message":"Sensor '<uuid>' is under maintenance and cannot accept new readings."}` — HTTP 403
 
 ---
 
 **Delete a room that still has sensors → 409**
 ```bash
-curl -s -X DELETE http://localhost:8080/api/v1/rooms/LIB-301
+curl -s -X DELETE "http://localhost:8080/api/v1/rooms/$ROOM_ID"
 ```
-Expected: `{"error":"Room contains active sensors."}` — HTTP 409. `RoomResource.deleteRoom` checks `room.getSensorIds().isEmpty()` before removing.
+Expected: `{"message":"Room contains active sensors."}` — HTTP 409. `RoomResource.deleteRoom` checks `room.getSensorIds().isEmpty()` before removing.
 
 ---
 
@@ -180,9 +184,9 @@ Expected: `{"error":"Room contains active sensors."}` — HTTP 409. `RoomResourc
 ```bash
 curl -s -X POST http://localhost:8080/api/v1/sensors \
   -H "Content-Type: application/json" \
-  -d '{"id":"TEMP-999","roomId":"INVALID-101","type":"TEMPERATURE","status":"ACTIVE","currentValue":0.0}'
+  -d '{"roomId":"INVALID-101","type":"TEMPERATURE","status":"ACTIVE","currentValue":0.0}'
 ```
-Expected: `{"error":"Referenced room does not exist."}` — HTTP 422
+Expected: `{"message":"Room with ID 'INVALID-101' does not exist."}` — HTTP 422
 
 ---
 
