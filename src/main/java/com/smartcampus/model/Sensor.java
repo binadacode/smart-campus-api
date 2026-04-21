@@ -1,8 +1,11 @@
 package com.smartcampus.model;
 
+import jakarta.json.bind.annotation.JsonbProperty;
+
 public class Sensor {
 
     private String id;
+    @JsonbProperty("sensorType")
     private String type;
     private String status;
     // Double (wrapper) instead of double (primitive) so the field can be null

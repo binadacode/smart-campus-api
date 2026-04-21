@@ -12,6 +12,7 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,7 @@ public class SensorResource {
 
     @GET
     public Collection<Sensor> getAllSensors(@QueryParam("type") String type) {
-        if (type == null) {
+        if (type == null || type.trim().isEmpty()) {
             return DataStore.sensors.values();
         }
 
