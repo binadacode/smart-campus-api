@@ -25,11 +25,14 @@ public class SensorResource {
             return DataStore.sensors.values();
         }
 
-        // Call equalsIgnoreCase on the non-null query param so that a sensor
-        // with a null type field never throws a NullPointerException.
+        final String trimmedType = type.trim();
+
         return DataStore.sensors.values()
                 .stream()
-                .filter(sensor -> type.equalsIgnoreCase(sensor.getType()))
+                .filter(sensor -> {
+                    String sensorType = sensor.getType();
+                    return sensorType != null && trimmedType.equalsIgnoreCase(sensorType.trim());
+                })
                 .collect(Collectors.toList());
     }
 
