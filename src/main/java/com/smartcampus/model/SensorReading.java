@@ -1,15 +1,17 @@
 package com.smartcampus.model;
 
+import java.time.Instant;
+
 public class SensorReading {
 
     private String id;
-    private long timestamp; // Epoch time in milliseconds; overwritten server-side on every POST
-    private double value;
+    private String timestamp; // ISO-8601 format or epoch string
+    private Double value;
 
     public SensorReading() {
     }
 
-    public SensorReading(String id, long timestamp, double value) {
+    public SensorReading(String id, String timestamp, Double value) {
         this.id = id;
         this.timestamp = timestamp;
         this.value = value;
@@ -23,19 +25,19 @@ public class SensorReading {
         this.id = id;
     }
 
-    public long getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 
-    public double getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 }

@@ -41,10 +41,13 @@ public class SensorReadingResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addReading(SensorReading reading) {
+        System.out.println("[DIAGNOSTIC] POST /sensors/" + sensorId + "/readings received: " +
+                           (reading != null ? "Value=" + reading.getValue() : "NULL reading"));
 
         Sensor sensor = DataStore.sensors.get(sensorId);
 
         if (sensor == null) {
+            System.out.println("[DIAGNOSTIC] Sensor " + sensorId + " NOT FOUND.");
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(new ErrorResponse("Sensor not found."))
                     .type(MediaType.APPLICATION_JSON)
@@ -52,24 +55,28 @@ public class SensorReadingResource {
         }
 
         if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
+            System.out.println("[DIAGNOSTIC] Sensor " + sensorId + " is in MAINTENANCE.");
             throw new SensorUnavailableException(
                     "Sensor '" + sensorId + "' is under maintenance and cannot accept new readings.");
         }
 
         // Server is authoritative for both ID and timestamp generation.
         reading.setId(UUID.randomUUID().toString());
-        reading.setTimestamp(System.currentTimeMillis());
+        reading.setTimestamp(java.time.Instant.now().toString());
 
         DataStore.readings
                 .computeIfAbsent(sensorId, k -> new ArrayList<>())
                 .add(reading);
 
-        // reading.getValue() returns a primitive double — box it so we can null-check
-        // before passing to sensor.setCurrentValue(Double). Prevents unboxing NPE
-        // if the request body omits the "value" field entirely.
+        System.out.println("[DIAGNOSTIC] Reading saved. ID=" + reading.getId());
+
+        // Update the sensor's current value for convenience in the GET /sensors response.
         Double readingValue = reading.getValue();
         if (readingValue != null) {
+            System.out.println("[DIAGNOSTIC] Updating sensor " + sensorId + " currentValue to " + readingValue);
             sensor.setCurrentValue(readingValue);
+        } else {
+            System.out.println("[DIAGNOSTIC] Reading value was NULL, sensor currentValue NOT updated.");
         }
 
         return Response.status(Response.Status.CREATED)

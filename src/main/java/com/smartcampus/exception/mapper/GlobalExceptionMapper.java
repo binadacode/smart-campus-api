@@ -16,6 +16,10 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable ex) {
+        if (ex instanceof jakarta.ws.rs.WebApplicationException) {
+            return ((jakarta.ws.rs.WebApplicationException) ex).getResponse();
+        }
+
         // Log the full stack trace so the actual cause is visible in the console.
         LOGGER.log(Level.SEVERE, "Unhandled exception caught by GlobalExceptionMapper", ex);
 
