@@ -1,17 +1,15 @@
 package com.smartcampus.model;
 
-import java.time.Instant;
-
 public class SensorReading {
 
-    private String id;
-    private String timestamp; // ISO-8601 format or epoch string
-    private Double value;
+    private String id; // Unique reading event ID (UUID recommended)
+    private long timestamp; // Epoch time (ms) when the reading was captured
+    private double value; // The actual metric value recorded by the hardware
 
     public SensorReading() {
     }
 
-    public SensorReading(String id, String timestamp, Double value) {
+    public SensorReading(String id, long timestamp, double value) {
         this.id = id;
         this.timestamp = timestamp;
         this.value = value;
@@ -25,19 +23,19 @@ public class SensorReading {
         this.id = id;
     }
 
-    public String getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
-    public Double getValue() {
+    public double getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(double value) {
         this.value = value;
     }
 }

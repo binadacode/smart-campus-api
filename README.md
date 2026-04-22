@@ -25,7 +25,7 @@ smart-campus-api/
                     │   └── SensorReading.java
                     ├── resource/
                     │   ├── DiscoveryResource.java       # GET /api/v1/
-                    │   ├── RoomResource.java            # /api/v1/rooms
+                    │   ├── SensorRoom.java              # /api/v1/rooms
                     │   ├── SensorResource.java          # /api/v1/sensors  (sub-resource locator for readings)
                     │   └── SensorReadingResource.java   # /api/v1/sensors/{id}/readings
                     ├── exception/
@@ -176,7 +176,7 @@ Expected: `{"message":"Sensor '<uuid>' is under maintenance and cannot accept ne
 ```bash
 curl -s -X DELETE "http://localhost:8080/api/v1/rooms/$ROOM_ID"
 ```
-Expected: `{"message":"Room contains active sensors."}` — HTTP 409. `RoomResource.deleteRoom` checks `room.getSensorIds().isEmpty()` before removing.
+Expected: `{"message":"Room contains active sensors."}` — HTTP 409. `SensorRoom.deleteRoom` checks `room.getSensorIds().isEmpty()` before removing.
 
 ---
 

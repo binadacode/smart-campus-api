@@ -12,7 +12,7 @@ import java.util.Collection;
 
 @Path("/rooms")
 @Produces(MediaType.APPLICATION_JSON)
-public class RoomResource {
+public class SensorRoom {
 
     // GET /api/v1/rooms
     @GET
@@ -21,19 +21,18 @@ public class RoomResource {
     }
 
     // POST /api/v1/rooms
-    // POST /api/v1/rooms
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createRoom(Room room) {
 
-        // 1. Generate the ID on the server (Delete the old null check)
+        // 1. Generate the ID on the server
         String generatedId = java.util.UUID.randomUUID().toString();
         room.setId(generatedId);
 
         // 2. Save to DataStore
         DataStore.rooms.put(generatedId, room);
 
-        // 3. Use Map.of() for safe JSON serialization
+        // 3. Return the generated ID
         return Response.status(Response.Status.CREATED)
                 .entity(java.util.Map.of("id", generatedId))
                 .build();
@@ -47,7 +46,6 @@ public class RoomResource {
         Room room = DataStore.rooms.get(id);
 
         if (room == null) {
-            // Return error as a structured JSON object
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(java.util.Map.of("error", "Room not found."))
                     .build();
@@ -64,7 +62,6 @@ public class RoomResource {
         Room room = DataStore.rooms.get(id);
 
         if (room == null) {
-            // Return error as a structured JSON object
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(java.util.Map.of("error", "Room not found."))
                     .build();

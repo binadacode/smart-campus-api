@@ -1,22 +1,17 @@
 package com.smartcampus.model;
 
-import jakarta.json.bind.annotation.JsonbProperty;
-
 public class Sensor {
 
-    private String id;
-    @JsonbProperty("sensorType")
-    private String type;
-    private String status;
-    // Double (wrapper) instead of double (primitive) so the field can be null
-    // when no reading has been received yet, and to prevent unboxing NPEs.
-    private Double currentValue;
-    private String roomId;
+    private String id; // Unique identifier, e.g., "TEMP-001"
+    private String type; // Category, e.g., "Temperature", "Occupancy", "CO2"
+    private String status; // Current state: "ACTIVE", "MAINTENANCE", or "OFFLINE"
+    private double currentValue; // The most recent measurement recorded
+    private String roomId; // Foreign key linking to the Room where the sensor is located.
 
     public Sensor() {
     }
 
-    public Sensor(String id, String type, String status, Double currentValue, String roomId) {
+    public Sensor(String id, String type, String status, double currentValue, String roomId) {
         this.id = id;
         this.type = type;
         this.status = status;
@@ -48,11 +43,11 @@ public class Sensor {
         this.status = status;
     }
 
-    public Double getCurrentValue() {
+    public double getCurrentValue() {
         return currentValue;
     }
 
-    public void setCurrentValue(Double currentValue) {
+    public void setCurrentValue(double currentValue) {
         this.currentValue = currentValue;
     }
 
