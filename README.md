@@ -54,32 +54,25 @@ No external servlet container is needed. The project uses `jersey-container-griz
 
 ---
 
-## 4. Build & Run
+## 4. Build & Run (NetBeans)
 
-Build a fat JAR (the `exec-maven-plugin` is already configured in `pom.xml`):
+This project is configured for deployment via the NetBeans IDE and Apache Tomcat. You do not need to use terminal commands to launch the API; NetBeans handles the Maven build and Tomcat deployment automatically.
 
-```bash
-mvn clean package
-```
+**Step 1: Build the Project**
+1. In the **Projects** window on the left, right-click the `smart-campus-api` project folder.
+2. Select **Clean and Build**.
+3. Watch the Output window at the bottom of the screen and wait for the green `BUILD SUCCESS` message.
 
-Run the server:
+**Step 2: Run the Server**
+1. Right-click your project folder again and select **Run** (or click the green "Play" button in the top toolbar).
+2. NetBeans will package your application and deploy it to your configured Apache Tomcat server.
+3. Check the **Apache Tomcat** tab in the Output window. The server is ready when you see:
+   `Smart Campus API Initialized at /api/v1`
 
-```bash
-mvn exec:java
-```
-
-The server starts at `http://localhost:8080/api/v1/` and prints:
-
-```
-Smart Campus API running at http://localhost:8080/api/v1/
-Press Enter to stop...
-```
-
-Confirm the API is up:
-
-```bash
-curl http://localhost:8080/api/v1/
-```
+**Step 3: Confirm the API is up**
+To verify the server is actively listening, open Postman and send a basic `GET` request to the discovery endpoint:
+```text
+GET http://localhost:8080/api/v1/
 
 ---
 
