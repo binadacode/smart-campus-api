@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-This API lets campus facilities staff and automated building systems register rooms, deploy sensors in those rooms, and record sensor readings over time. It exposes four resource groups — rooms, sensors, readings, and a discovery root — over HTTP using JSON. Rooms track a name, capacity, and a list of sensor IDs. Sensors carry a type (e.g. `CO2`, `TEMPERATURE`), a status (`ACTIVE` or `MAINTENANCE`), and a `currentValue` field that is updated every time a new reading is posted. All data lives in memory; nothing is written to disk. The server runs as a standalone Grizzly process started from `Main.java`; there is no WAR file and no external servlet container needed.
+This API lets campus facilities staff and automated building systems register rooms, deploy sensors in those rooms, and record sensor readings over time. It exposes four resource groups — rooms, sensors, readings, and a discovery root — over HTTP using JSON. Rooms track a name, capacity, and a list of sensor IDs. Sensors carry a type (e.g. `CO2`, `TEMPERATURE`), a status (`ACTIVE` or `MAINTENANCE`), and a `currentValue` field that is updated every time a new reading is posted. All data lives in memory; nothing is written to disk. The project is packaged as a WAR file and deployed to an Apache Tomcat servlet container. Jersey 3.1.5 runs inside Tomcat via the Servlet container integration, configured by `ApplicationConfig.java`.
 
 ---
 
@@ -13,32 +13,36 @@ smart-campus-api/
 ├── pom.xml
 └── src/
     └── main/
-        └── java/
-            └── com/
-                └── smartcampus/
-                    ├── Main.java                        # Entry point — starts embedded Grizzly server
-                    ├── SmartCampusApplication.java      # ResourceConfig — registers all packages
-                    ├── DataStore.java                   # Static ConcurrentHashMaps for rooms, sensors, readings
-                    ├── model/
-                    │   ├── Room.java
-                    │   ├── Sensor.java
-                    │   └── SensorReading.java
-                    ├── resource/
-                    │   ├── DiscoveryResource.java       # GET /api/v1/
-                    │   ├── SensorRoom.java              # /api/v1/rooms
-                    │   ├── SensorResource.java          # /api/v1/sensors  (sub-resource locator for readings)
-                    │   └── SensorReadingResource.java   # /api/v1/sensors/{id}/readings
-                    ├── exception/
-                    │   ├── RoomNotEmptyException.java
-                    │   ├── SensorUnavailableException.java
-                    │   └── LinkedResourceNotFoundException.java
-                    │   └── mapper/
-                    │       ├── RoomNotEmptyExceptionMapper.java          # → 409
-                    │       ├── SensorUnavailableExceptionMapper.java     # → 403
-                    │       ├── LinkedResourceNotFoundExceptionMapper.java # → 422
-                    │       └── GlobalExceptionMapper.java                # Throwable → 500
-                    └── filter/
-                        └── ApiLoggingFilter.java        # Logs method, URI, and response status for every request
+        ├── java/
+        │   └── com/
+        │       └── smartcampus/
+        │           ├── ApplicationConfig.java      # ResourceConfig — registers resources, mappers, and filters
+        │           ├── DataStore.java              # Static ConcurrentHashMaps for rooms, sensors, readings
+        │           ├── model/
+        │           │   ├── ErrorResponse.java
+        │           │   ├── Room.java
+        │           │   ├── Sensor.java
+        │           │   └── SensorReading.java
+        │           ├── resource/
+        │           │   ├── DiscoveryResource.java       # GET /api/v1/
+        │           │   ├── SensorRoom.java              # /api/v1/rooms
+        │           │   ├── SensorResource.java          # /api/v1/sensors  (sub-resource locator for readings)
+        │           │   └── SensorReadingResource.java   # /api/v1/sensors/{id}/readings
+        │           ├── exception/
+        │           │   ├── RoomNotEmptyException.java
+        │           │   ├── SensorUnavailableException.java
+        │           │   └── LinkedResourceNotFoundException.java
+        │           │   └── mapper/
+        │           │       ├── RoomNotEmptyExceptionMapper.java          # -> 409
+        │           │       ├── SensorUnavailableExceptionMapper.java     # -> 403
+        │           │       ├── LinkedResourceNotFoundExceptionMapper.java # -> 422
+        │           │       └── GlobalExceptionMapper.java                # Throwable -> 500
+        │           └── filter/
+        │               └── ApiLoggingFilter.java        # Logs method, URI, and response status for every request
+        └── webapp/
+            ├── META-INF/
+            │   └── context.xml
+            └── index.html                               # Redirects to ./api/v1
 ```
 
 ---
@@ -49,12 +53,15 @@ smart-campus-api/
 |---|---|
 | Java | 17 |
 | Maven | 3.8 |
+| Apache Tomcat | 10.x |
 
-No external servlet container is needed. The project uses `jersey-container-grizzly2-http 3.1.5`, which embeds an HTTP server into the JAR.
+Tomcat 10 is required because the project uses Jakarta EE 9+ (`jakarta.servlet` namespace). The POM includes the Cargo Maven plugin, which can download and run an embedded Tomcat 10 instance automatically. Alternatively, you can deploy the generated WAR to a standalone Tomcat installation.
 
 ---
 
-## 4. Build & Run (NetBeans)
+## 4. Build & Run
+
+### NetBeans IDE (recommended)
 
 This project is configured for deployment via the NetBeans IDE and Apache Tomcat. You do not need to use terminal commands to launch the API; NetBeans handles the Maven build and Tomcat deployment automatically.
 
@@ -72,8 +79,8 @@ This project is configured for deployment via the NetBeans IDE and Apache Tomcat
 **Step 3: Confirm the API is up**
 To verify the server is actively listening, open Postman and send a basic `GET` request to the discovery endpoint:
 ```text
-GET http://localhost:8080/api/v1/
-
+GET http://localhost:8080/smart-campus-api/api/v1/
+```
 ---
 
 ## 5. API Reference
@@ -113,13 +120,13 @@ GET http://localhost:8080/api/v1/
 
 ## 6. Sample curl Commands
 
-All commands target `http://localhost:8080/api/v1`. Start the server with `mvn exec:java` before running them.
+All commands target `http://localhost:8080/smart-campus-api/api/v1`. Start the server with NetBeans **Run** or `mvn cargo:run` before running them.
 
 > **Note:** The server generates all resource IDs as UUIDs server-side. Any `id` field sent in the request body is ignored. The examples below use shell variables to capture returned IDs for chaining commands.
 
 **Create a room**
 ```bash
-ROOM_ID=$(curl -s -X POST http://localhost:8080/api/v1/rooms \
+ROOM_ID=$(curl -s -X POST http://localhost:8080/smart-campus-api/api/v1/rooms \
   -H "Content-Type: application/json" \
   -d '{"name":"Central Library Reading Room","capacity":120}' | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
 echo "Room ID: $ROOM_ID"
@@ -130,7 +137,7 @@ Expected response body: `{"id":"<uuid>"}` — HTTP 201
 
 **Create a CO2 sensor in that room**
 ```bash
-SENSOR_ID=$(curl -s -X POST http://localhost:8080/api/v1/sensors \
+SENSOR_ID=$(curl -s -X POST http://localhost:8080/smart-campus-api/api/v1/sensors \
   -H "Content-Type: application/json" \
   -d "{\"roomId\":\"$ROOM_ID\",\"type\":\"CO2\",\"status\":\"ACTIVE\",\"currentValue\":0.0}" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
 echo "Sensor ID: $SENSOR_ID"
@@ -141,7 +148,7 @@ Expected response body: `{"id":"<uuid>"}` — HTTP 201. The sensor UUID is also 
 
 **Post a reading to an ACTIVE sensor (verify `currentValue` side effect)**
 ```bash
-curl -s -X POST "http://localhost:8080/api/v1/sensors/$SENSOR_ID/readings" \
+curl -s -X POST "http://localhost:8080/smart-campus-api/api/v1/sensors/$SENSOR_ID/readings" \
   -H "Content-Type: application/json" \
   -d '{"value":415.5}'
 ```
@@ -149,15 +156,15 @@ Expected: `{"id":"<uuid>"}` — HTTP 201. After this call, `GET /api/v1/sensors/
 
 ---
 
-**Post a reading to a MAINTENANCE sensor → 403**
+**Post a reading to a MAINTENANCE sensor -> 403**
 ```bash
 # Create a sensor in MAINTENANCE status in the same room
-MAINT_ID=$(curl -s -X POST http://localhost:8080/api/v1/sensors \
+MAINT_ID=$(curl -s -X POST http://localhost:8080/smart-campus-api/api/v1/sensors \
   -H "Content-Type: application/json" \
   -d "{\"roomId\":\"$ROOM_ID\",\"type\":\"TEMPERATURE\",\"status\":\"MAINTENANCE\",\"currentValue\":0.0}" | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
 
 # Then attempt a reading — this will be rejected
-curl -s -X POST "http://localhost:8080/api/v1/sensors/$MAINT_ID/readings" \
+curl -s -X POST "http://localhost:8080/smart-campus-api/api/v1/sensors/$MAINT_ID/readings" \
   -H "Content-Type: application/json" \
   -d '{"value":22.1}'
 ```
@@ -165,17 +172,17 @@ Expected: `{"message":"Sensor '<uuid>' is under maintenance and cannot accept ne
 
 ---
 
-**Delete a room that still has sensors → 409**
+**Delete a room that still has sensors -> 409**
 ```bash
-curl -s -X DELETE "http://localhost:8080/api/v1/rooms/$ROOM_ID"
+curl -s -X DELETE "http://localhost:8080/smart-campus-api/api/v1/rooms/$ROOM_ID"
 ```
 Expected: `{"message":"Room contains active sensors."}` — HTTP 409. `SensorRoom.deleteRoom` checks `room.getSensorIds().isEmpty()` before removing.
 
 ---
 
-**Create a sensor with a non-existent roomId → 422**
+**Create a sensor with a non-existent roomId -> 422**
 ```bash
-curl -s -X POST http://localhost:8080/api/v1/sensors \
+curl -s -X POST http://localhost:8080/smart-campus-api/api/v1/sensors \
   -H "Content-Type: application/json" \
   -d '{"roomId":"INVALID-101","type":"TEMPERATURE","status":"ACTIVE","currentValue":0.0}'
 ```
@@ -185,7 +192,7 @@ Expected: `{"message":"Room with ID 'INVALID-101' does not exist."}` — HTTP 42
 
 **Filter sensors by type**
 ```bash
-curl -s "http://localhost:8080/api/v1/sensors?type=CO2"
+curl -s "http://localhost:8080/smart-campus-api/api/v1/sensors?type=CO2"
 ```
 Expected: Array containing only sensors whose `type` matches `"CO2"` (case-insensitive). Returns an empty array `[]` if none match.
 
@@ -209,7 +216,7 @@ As the fields are static they belong to the class and not to any 1 instance. Eve
 
 ### Q2 (Part 1.2): HATEOAS and its benefit to client developers
 
-HATEOAS means the server includes links in its responses that tell the client what it can do next instead of the client knowing all URLs upfront. A response to POST /rooms that follows HATEOAS would include a self link, a link to the room’s sensors and a link to delete the room. The client uses those links rather than creating URLs on a different document. The usefulness of this in practice is that URLs can be modified on the server side without errors. A client that navigates links does not hardcode /api/v1/rooms/LIB-301, it discovers the path at runtime from its response. This is particularly useful when resources move, are versioned or have conditional links. The API’s discovery endpoint (GET /api/v1 ) returns a resources map with paths to /api/v1/rooms and /api/v1/sensors which is a step towards HATEOAS. 
+HATEOAS means the server includes links in its responses that tell the client what it can do next instead of the client knowing all URLs upfront. A response to POST /rooms that follows HATEOAS would include a self link, a link to the room's sensors and a link to delete the room. The client uses those links rather than creating URLs on a different document. The usefulness of this in practice is that URLs can be modified on the server side without errors. A client that navigates links does not hardcode /api/v1/rooms/LIB-301, it discovers the path at runtime from its response. This is particularly useful when resources move, are versioned or have conditional links. The API's discovery endpoint (GET /api/v1 ) returns a resources map with paths to /api/v1/rooms and /api/v1/sensors which is a step towards HATEOAS. 
 
 ---
 
@@ -248,7 +255,7 @@ public SensorReadingResource getReadingResource(@PathParam("sensorId") String se
 }
 ```
 
-There is no @GET or @POST on this method. JAX-RS recognizes it as a subresource locator because it returns an object (SensorReadingResource). JAX-RS continues dispatching the request to that object’s annotated methods. The sensorId path parameter is passed to SensorReadingResource through its constructor so the reading resource always knows which sensor it belongs to. The alternative is to define every GET /sensors/{id}/readings and POST /sensors/{id}/readings method directly inside SensorResource. That works for 2 methods but becomes a problem when readings have their own sub paths, when the reading logic is complicated or when SensorReadingResource should be tested separately. The locator pattern puts reading logic in its own class with a single responsibility and keeps SensorResouce focused on sensor level operations.
+There is no @GET or @POST on this method. JAX-RS recognizes it as a subresource locator because it returns an object (SensorReadingResource). JAX-RS continues dispatching the request to that object's annotated methods. The sensorId path parameter is passed to SensorReadingResource through its constructor so the reading resource always knows which sensor it belongs to. The alternative is to define every GET /sensors/{id}/readings and POST /sensors/{id}/readings method directly inside SensorResource. That works for 2 methods but becomes a problem when readings have their own sub paths, when the reading logic is complicated or when SensorReadingResource should be tested separately. The locator pattern puts reading logic in its own class with a single responsibility and keeps SensorResouce focused on sensor level operations.
 
 ---
 
@@ -263,10 +270,10 @@ There is no @GET or @POST on this method. JAX-RS recognizes it as a subresource 
 A stack trace names every class and method in the call chain, including package names, the Jersey and Grizzly versions and sometimes the operating system path to the JAR file. An attacker can use this to:
 
 1. **Identify library versions:** if the trace shows the Jersey version the attacker can check whether that version has known CVEs and target them.
-2. **Map the internal structure:** package names reveal the application’s class layout. This makes it easier to guess other endpoints or identiy which methods should be attacked.
+2. **Map the internal structure:** package names reveal the application's class layout. This makes it easier to guess other endpoints or identiy which methods should be attacked.
 3. **Confirm injection payloads worked:** if an SQL injection or deserialization attack partially succeeds, the resulting exception trace tells the attacker which layer broke and how to adjust accordingly.
 
-This project’s GlobalExceptionMapper catches Throwable and returns only {"error":"Unexpected error occurred"} with a 500 status. The exception message and stack trace are never written to the response body. The full trace is still logged server side where developers can view it but customers cannot.
+This project's GlobalExceptionMapper catches Throwable and returns only {"error":"Unexpected error occurred"} with a 500 status. The exception message and stack trace are never written to the response body. The full trace is still logged server side where developers can view it but customers cannot.
 
 ---
 
