@@ -55,7 +55,7 @@ smart-campus-api/
 | Maven | 3.8 |
 | Apache Tomcat | 10.x |
 
-Tomcat 10 is required because the project uses Jakarta EE 9+ (`jakarta.servlet` namespace). The POM includes the Cargo Maven plugin, which can download and run an embedded Tomcat 10 instance automatically. Alternatively, you can deploy the generated WAR to a standalone Tomcat installation.
+Tomcat 10 is required because the project uses Jakarta EE 9+ (`jakarta.servlet` namespace). You can deploy the generated WAR file to a standalone Tomcat installation.
 
 ---
 
